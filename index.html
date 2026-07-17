@@ -82,6 +82,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
   line-height: 1.65;
+  padding-top: 64px; /* Account for fixed header */
 }
 .mono { font-family: 'JetBrains Mono', monospace; }
 ::selection { background: rgba(124,107,243,.5); color: #fff; }
@@ -163,14 +164,13 @@ a { color: inherit; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* =========================================================
-   NAV — GLASSMORPHISM PREMIUM
+   NAV — SOLID HIGH VISIBILITY
    ========================================================= */
 nav {
-  position: sticky; top: 0; z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 6vw; height: 64px;
-  background: rgba(6,13,31,.75);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: #060d1f; /* Solid dark background to ensure absolute visibility on mobiles */
   border-bottom: 1px solid rgba(30,45,77,.8);
   box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 4px 20px rgba(0,0,0,.3);
 }
@@ -691,23 +691,35 @@ h2 {
 }
 
 /* =========================================================
-   FOOTER — LOGO ONLY
+   FOOTER — 3-COLUMN SIDE-BY-SIDE
    ========================================================= */
 footer {
-  padding: 10px 6vw 8px;
+  padding: 16px 6vw 12px;
   border-top: 1px solid var(--line);
   background: linear-gradient(to bottom, transparent, rgba(6,13,31,.5));
   position: relative; overflow: visible;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 10px;
 }
 footer::before {
   content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   width: 600px; height: 1px;
   background: linear-gradient(to right, transparent, var(--cyan), var(--violet), transparent);
 }
-.footer-left img { height: 21px; width: auto; object-fit: contain; }
-.footer-center { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); }
+.footer-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.footer-left img { height: 24px; width: auto; object-fit: contain; }
+.footer-center {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+}
 .fn-glow {
   font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 800; color: #fff; opacity: 0.5;
   text-shadow: 0 0 8px var(--cyan), 0 0 12px var(--violet), 0 0 18px var(--coral);
@@ -718,9 +730,15 @@ footer::before {
   0% { text-shadow: 0 0 8px var(--cyan), 0 0 12px var(--violet); transform: scale(1); }
   100% { text-shadow: 0 0 12px var(--cyan), 0 0 18px var(--violet), 0 0 25px var(--coral); transform: scale(1.1); }
 }
-.footer-right { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
 .logo-dept { height: 27px; width: auto; object-fit: contain; }
-.logo-club { height: 14px; width: auto; object-fit: contain; transform: translateX(7px); }
+.logo-club { height: 14px; width: auto; object-fit: contain; }
 
 /* =========================================================
    RESPONSIVE — FULL MOBILE / TABLET / DESKTOP
@@ -792,16 +810,18 @@ footer::before {
   .cta-pill-row { gap: 6px; }
   .cta-pill { font-size: 10.5px; padding: 5px 12px; }
   .cta-btn { width: 100%; max-width: 320px; justify-content: center; padding: 15px 24px; font-size: .92rem; }
-  footer { flex-direction: column; align-items: flex-start; gap: 6px; }
-  .footer-right { align-items: flex-start; }
-  .footer-center { position: static; transform: none; padding: 2px 0; }
-  .logo-club { transform: none; }
+  footer { padding: 12px 4vw; gap: 6px; }
+  .footer-left img { height: 18px; }
+  .logo-dept { height: 20px; }
+  .logo-club { height: 11px; }
+  .fn-glow { font-size: 0.8rem; }
   #scrollTop { bottom: 20px; right: 16px; width: 40px; height: 40px; }
 }
 
 /* ── Small phones (≤400px — e.g. iPhone SE, Galaxy A series) ── */
 @media (max-width: 400px) {
   html { font-size: 15px; }
+  body { padding-top: 58px; }
   nav { height: 58px; padding: 0 4vw; }
   .nav-links { top: 58px; }
   #hero { padding: 60px 4vw 50px; min-height: 80vh; }
@@ -819,10 +839,10 @@ footer::before {
   .cta-card { padding: 40px 18px; }
   .cta-title { font-size: clamp(1.2rem, 7vw, 1.7rem); }
   .cta-sub { font-size: .88rem; }
-  .footer-left img { height: 16px; }
+  .footer-left img { height: 14px; }
   .logo-dept { height: 16px; }
-  .logo-club { height: 10px; }
-  .fn-glow { font-size: .85rem; }
+  .logo-club { height: 9px; }
+  .fn-glow { font-size: 0.72rem; }
   #bootBox { border-radius: 10px; }
   #bootLines { padding: 16px 16px; font-size: 12px; min-height: 140px; }
   /* Reduce GPU-heavy blur on low-end mobile */

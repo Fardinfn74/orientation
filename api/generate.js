@@ -58,6 +58,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid or unsupported filter type' });
     }
 
+    const mimeMatch = imageBase64.match(/^data:(image\/[a-zA-Z+]+);base64,/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
     const base64Data = imageBase64.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, '');
 
     // ─── STAGE 1: Fal.ai (Super Fast & High Quality - Paid/Trial) ─────────────
@@ -204,15 +206,17 @@ export default async function handler(req, res) {
     }
 
     // ─── STAGE 4: Gemini Image Generation ─────────────────────────────────────
-    const apiKeysStr = process.env.GEMINI_API_KEYS;
+    const apiKeysStr = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY;
     let lastError = 'No Gemini keys configured';
 
     if (apiKeysStr) {
-      const apiKeys = apiKeysStr.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      const apiKeys = apiKeysStr.split(',').map(k => k.trim()).filter(k => k.length > 0 && k !== 'your_gemini_key_here');
       const imageModels = [
-        'gemini-2.5-flash-image',
+        'gemini-3.1-flash-image-preview',
         'gemini-3.1-flash-image',
-        'gemini-3-pro-image'
+        'gemini-3.1-flash-lite-image',
+        'gemini-3-pro-image',
+        'gemini-2.5-flash-image'
       ];
 
       const startIndex = Math.floor(Math.random() * apiKeys.length);
@@ -227,32 +231,38 @@ export default async function handler(req, res) {
           try {
             const response = await fetch(geminiUrl, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey
+              },
               body: JSON.stringify({
                 contents: [{
                   parts: [
                     { text: stylePrompt },
-                    { inline_data: { mime_type: 'image/png', data: base64Data } }
+                    { inline_data: { mime_type: mimeType, data: base64Data } }
                   ]
                 }],
-                generationConfig: { responseModalities: ['image', 'text'] }
+                generationConfig: { responseModalities: ['IMAGE'] }
               }),
-              signal: AbortSignal.timeout(15000)
+              signal: AbortSignal.timeout(20000)
             });
 
             if (!response.ok) {
-              lastError = `Key ${keyIndex + 1}/${model}: ${response.status}`;
+              const errBody = await response.text().catch(() => '');
+              lastError = `Key ${keyIndex + 1}/${model}: ${response.status} - ${errBody.substring(0, 150)}`;
               console.warn(`[Gemini] ${lastError}`);
               continue; // try next model or key
             }
 
             const data = await response.json();
-            const imgPart = data.candidates?.[0]?.content?.parts?.find(p => p.inline_data);
+            const imgPart = data.candidates?.[0]?.content?.parts?.find(p => p.inline_data || p.inlineData);
             if (imgPart) {
+              const innerImg = imgPart.inline_data || imgPart.inlineData;
+              const respMime = innerImg.mime_type || innerImg.mimeType || 'image/png';
               console.log(`[Gemini] ✅ Success with Key ${keyIndex + 1}/${model}`);
               return res.status(200).json({ 
                 success: true, 
-                imageBase64: `data:${imgPart.inline_data.mime_type};base64,${imgPart.inline_data.data}` 
+                imageBase64: `data:${respMime};base64,${innerImg.data}`
               });
             }
           } catch (err) {
