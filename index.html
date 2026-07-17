@@ -75,14 +75,18 @@
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; font-size: 16px; }
+html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; width: 100%; }
 body {
   background: var(--bg);
   color: var(--ink);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
+  width: 100%;
   line-height: 1.65;
-  padding-top: 64px; /* Account for fixed header */
+}
+body.loading {
+  overflow: hidden !important;
+  height: 100vh !important;
 }
 .mono { font-family: 'JetBrains Mono', monospace; }
 ::selection { background: rgba(124,107,243,.5); color: #fff; }
@@ -167,7 +171,7 @@ a { color: inherit; }
    NAV — GLASSMORPHISM (MATCHES PHOTO BOOTH PAGE)
    ========================================================= */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: sticky; top: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 6vw; height: 64px;
   background: rgba(6,13,31,.78);
@@ -179,7 +183,8 @@ nav {
   text-decoration: none; display: flex; align-items: center; gap: 11px;
   font-weight: 700; font-size: 1rem; letter-spacing: .4px;
 }
-.logo-img { height: 36px; filter: brightness(0) invert(1) opacity(.85); }
+.logo-img { height: 36px; filter: brightness(0) invert(1) opacity(.85); transition: opacity var(--t); }
+.logo-img:hover { opacity: 1; }
 .logo-text { color: var(--ink-2); }
 .logo-text em { color: var(--cyan); font-style: normal; }
 .nav-cta {
@@ -657,10 +662,10 @@ footer {
   padding: 16px 6vw 12px;
   border-top: 1px solid var(--line);
   background: linear-gradient(to bottom, transparent, rgba(6,13,31,.5));
-  position: relative; overflow: visible;
+  position: relative; overflow: hidden;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
   gap: 10px;
 }
 footer::before {
@@ -765,7 +770,7 @@ footer::before {
 /* ── Small phones (≤400px — e.g. iPhone SE, Galaxy A series) ── */
 @media (max-width: 400px) {
   html { font-size: 15px; }
-  body { padding-top: 58px; }
+  body { padding-top: 0; }
   nav { height: 58px; padding: 0 4vw; }
   #hero { padding: 60px 4vw 50px; min-height: 80vh; }
   h1 { font-size: clamp(1.25rem, 8vw, 1.8rem); line-height: 1.2; }
@@ -807,7 +812,7 @@ footer::before {
 }
 </style>
 </head>
-<body>
+<body class="loading">
 
 <!-- ANIMATED MESH BACKGROUND -->
 <div id="meshBg" aria-hidden="true">
@@ -1116,7 +1121,10 @@ const bootEl = document.getElementById('bootLines');
 let bi = 0;
 function typeBootLine() {
   if (bi >= bootLines.length) {
-    setTimeout(() => document.getElementById('boot').classList.add('hide'), 200);
+    setTimeout(() => {
+      document.getElementById('boot').classList.add('hide');
+      document.body.classList.remove('loading');
+    }, 200);
     return;
   }
   const { t, cls } = bootLines[bi];
