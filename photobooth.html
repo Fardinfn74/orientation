@@ -7,6 +7,10 @@
 <meta name="description" content="UITS IT Department Fresher Photo Booth. Take a selfie, pick a filter — Cute Polaroid, Glitch Cyberpunk, Matrix Rain and more. Download and share.">
 <meta name="author" content="Department of Information Technology, UITS">
 <meta name="theme-color" content="#060d1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <meta property="og:title" content="UITS IT Fresher Photo Booth 2026">
 <meta property="og:description" content="Strike a pose and pick a filter. 7 creative filters — from cute polaroid to full cyberpunk terminal.">
 <meta property="og:url" content="https://uits-it-orientation.vercel.app/photobooth">
@@ -70,7 +74,7 @@ a { color: inherit; }
 #meshBg {
   position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
 }
-.mesh-orb { position: absolute; border-radius: 50%; filter: blur(90px); animation: orbDrift 20s ease-in-out infinite; }
+.mesh-orb { position: absolute; border-radius: 50%; filter: blur(90px); animation: orbDrift 20s ease-in-out infinite; will-change: transform; }
 .orb1 { width:500px;height:500px;background:radial-gradient(circle,rgba(45,212,191,.07),transparent 70%); top:-150px;left:-80px; animation-delay:0s; }
 .orb2 { width:400px;height:400px;background:radial-gradient(circle,rgba(124,107,243,.07),transparent 70%); top:30%;right:-100px; animation-delay:-8s; }
 .orb3 { width:600px;height:600px;background:radial-gradient(circle,rgba(244,114,182,.04),transparent 70%); bottom:-150px;left:25%; animation-delay:-15s; }
@@ -306,6 +310,9 @@ nav {
   cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
   white-space: nowrap; background: rgba(17,29,53,.7); backdrop-filter: blur(10px);
   position: relative; overflow: hidden;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
 }
 .btn::before {
   content: ''; position: absolute; inset: 0;
@@ -350,6 +357,10 @@ nav {
   padding: 16px 14px; text-align: left; cursor: pointer; color: var(--ink);
   transition: all var(--t); position: relative; overflow: hidden;
   box-shadow: inset 0 1px 0 var(--neo-light);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
+  will-change: transform;
 }
 .filter-btn::before {
   content: ''; position: absolute; inset: 0;
@@ -526,6 +537,11 @@ footer::before {
   .logo-dept { height: 30px; }
   .logo-club { height: 18px; }
   .fn-glow { font-size: .8rem; }
+  /* Reduce GPU-heavy blur on low-end mobile */
+  .mesh-orb { filter: blur(50px) !important; }
+  .orb1 { width: 220px !important; height: 220px !important; }
+  .orb2 { width: 180px !important; height: 180px !important; }
+  .orb3 { width: 280px !important; height: 280px !important; }
 }
 
 /* ── Very small (≤320px) ── */
@@ -534,6 +550,10 @@ footer::before {
   .filters { grid-template-columns: 1fr 1fr; gap: 5px; }
   .filter-btn .filter-name { font-size: 9px; }
   .stage { min-height: 160px; }
+  .mesh-orb { filter: blur(40px) !important; }
+  .orb1 { width: 160px !important; height: 160px !important; }
+  .orb2 { width: 140px !important; height: 140px !important; }
+  .orb3 { width: 200px !important; height: 200px !important; }
 }
 </style>
 </head>
@@ -714,15 +734,20 @@ footer::before {
 </footer>
 
 <script>
-/* =================== CURSOR GLOW =================== */
+/* =================== CURSOR GLOW (desktop only) =================== */
 const cursorGlow = document.getElementById('cursorGlow');
-let cx = 0, cy = 0, tx = 0, ty = 0;
-document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
-(function animateCursor() {
-  cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
-  cursorGlow.style.left = cx + 'px'; cursorGlow.style.top = cy + 'px';
-  requestAnimationFrame(animateCursor);
-})();
+const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+if (!isTouchDevice()) {
+  let cx = 0, cy = 0, tx = 0, ty = 0;
+  document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+  (function animateCursor() {
+    cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
+    cursorGlow.style.left = cx + 'px'; cursorGlow.style.top = cy + 'px';
+    requestAnimationFrame(animateCursor);
+  })();
+} else {
+  cursorGlow.style.display = 'none';
+}
 
 /* =================== PHOTO BOOTH =================== */
 const video          = document.getElementById('video');
@@ -759,15 +784,19 @@ const filterNames = {
 
 startCamBtn.addEventListener('click', async () => {
   try {
-    const constraints = {
-      video: { 
-        facingMode: 'user',
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      },
+    /* Try ideal constraints first, fall back to simpler constraints on older/mobile devices */
+    let streamRef;
+    const constraintsIdeal = {
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: false
     };
-    streamRef = await navigator.mediaDevices.getUserMedia(constraints);
+    const constraintsFallback = { video: { facingMode: 'user' }, audio: false };
+    try {
+      streamRef = await navigator.mediaDevices.getUserMedia(constraintsIdeal);
+    } catch {
+      streamRef = await navigator.mediaDevices.getUserMedia(constraintsFallback);
+    }
+    window.streamRef = streamRef;
     video.srcObject = streamRef;
     video.style.display = 'block';
     placeholderMsg.style.display = 'none';

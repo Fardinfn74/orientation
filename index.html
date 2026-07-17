@@ -8,6 +8,10 @@
 <meta name="keywords" content="UITS, IT Department, Fresher Orientation, Information Technology, University, 2026">
 <meta name="author" content="Department of Information Technology, UITS">
 <meta name="theme-color" content="#060d1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <meta property="og:type" content="website">
 <meta property="og:title" content="UITS IT Dept — Fresher Orientation 2026">
 <meta property="og:description" content="You've just been compiled into IT. Welcome to the Department of Information Technology, UITS.">
@@ -93,6 +97,7 @@ a { color: inherit; }
 .mesh-orb {
   position: absolute; border-radius: 50%; filter: blur(90px);
   animation: orbDrift 20s ease-in-out infinite;
+  will-change: transform;
 }
 .orb1 { width:600px;height:600px;background:radial-gradient(circle,rgba(45,212,191,.08),transparent 70%); top:-200px;left:-100px; animation-delay:0s; }
 .orb2 { width:500px;height:500px;background:radial-gradient(circle,rgba(124,107,243,.08),transparent 70%); top:20%;right:-150px; animation-delay:-7s; }
@@ -345,6 +350,9 @@ h1 {
   white-space: nowrap; position: relative; overflow: hidden;
   background: rgba(17,29,53,.8);
   backdrop-filter: blur(10px);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
 }
 .btn::before {
   content: ''; position: absolute; inset: 0;
@@ -488,6 +496,7 @@ h2 {
   box-shadow: var(--shadow-card), inset 0 1px 0 var(--neo-light), inset 0 -1px 0 var(--neo-dark);
   transition: transform var(--t), border-color var(--t), box-shadow var(--t);
   position: relative; overflow: hidden;
+  will-change: transform;
 }
 .stat-card::before {
   content: ''; position: absolute; inset: 0;
@@ -517,6 +526,7 @@ h2 {
   box-shadow: var(--shadow-card), inset 0 1px 0 var(--neo-light);
   transition: transform var(--t), border-color var(--t), box-shadow var(--t);
   position: relative; overflow: hidden; cursor: default;
+  will-change: transform;
 }
 .card-glow {
   position: absolute; width: 120px; height: 120px; border-radius: 50%;
@@ -815,6 +825,11 @@ footer::before {
   .fn-glow { font-size: .85rem; }
   #bootBox { border-radius: 10px; }
   #bootLines { padding: 16px 16px; font-size: 12px; min-height: 140px; }
+  /* Reduce GPU-heavy blur on low-end mobile */
+  .mesh-orb { filter: blur(50px) !important; }
+  .orb1 { width: 280px !important; height: 280px !important; }
+  .orb2 { width: 240px !important; height: 240px !important; }
+  .orb3 { width: 320px !important; height: 320px !important; }
 }
 
 /* ── Very small phones (≤320px — e.g. iPhone 5) ── */
@@ -822,6 +837,10 @@ footer::before {
   h1 { font-size: 1.15rem; }
   .btn { padding: 11px 14px; font-size: 12px; }
   .stat-num { font-size: 1.5rem; }
+  .mesh-orb { filter: blur(40px) !important; }
+  .orb1 { width: 200px !important; height: 200px !important; }
+  .orb2 { width: 180px !important; height: 180px !important; }
+  .orb3 { width: 240px !important; height: 240px !important; }
 }
 </style>
 </head>
@@ -1117,15 +1136,20 @@ footer::before {
 </footer>
 
 <script>
-/* =================== CURSOR GLOW =================== */
+/* =================== CURSOR GLOW (desktop only) =================== */
 const cursorGlow = document.getElementById('cursorGlow');
-let cx = 0, cy = 0, tx = 0, ty = 0;
-document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
-(function animateCursor() {
-  cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
-  cursorGlow.style.left = cx + 'px'; cursorGlow.style.top = cy + 'px';
-  requestAnimationFrame(animateCursor);
-})();
+const isTouchDevice = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+if (!isTouchDevice()) {
+  let cx = 0, cy = 0, tx = 0, ty = 0;
+  document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+  (function animateCursor() {
+    cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
+    cursorGlow.style.left = cx + 'px'; cursorGlow.style.top = cy + 'px';
+    requestAnimationFrame(animateCursor);
+  })();
+} else {
+  cursorGlow.style.display = 'none';
+}
 
 /* =================== BOOT SEQUENCE (1s total) =================== */
 const bootLines = [
@@ -1187,7 +1211,10 @@ let nodes = [], mouseX = -9999, mouseY = -9999;
 function resizeNet() { netCanvas.width = netCanvas.offsetWidth; netCanvas.height = netCanvas.offsetHeight; }
 function initNodes() {
   nodes = [];
-  const count = Math.min(80, Math.floor(netCanvas.width / 18));
+  /* Reduce node count on mobile — O(n²) is expensive on small CPUs */
+  const isMobile = window.innerWidth < 768;
+  const maxNodes = isMobile ? 30 : 80;
+  const count = Math.min(maxNodes, Math.floor(netCanvas.width / 18));
   for (let i = 0; i < count; i++) {
     nodes.push({
       x: Math.random() * netCanvas.width, y: Math.random() * netCanvas.height,
@@ -1230,8 +1257,8 @@ function drawNet() {
 document.addEventListener('mousemove', e => {
   const rect = netCanvas.getBoundingClientRect();
   mouseX = e.clientX - rect.left; mouseY = e.clientY - rect.top;
-});
-window.addEventListener('resize', () => { resizeNet(); initNodes(); });
+}, { passive: true });
+window.addEventListener('resize', () => { resizeNet(); initNodes(); }, { passive: true });
 resizeNet(); initNodes(); drawNet();
 
 /* =================== SCROLL REVEAL =================== */
