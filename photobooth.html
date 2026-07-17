@@ -492,20 +492,35 @@ nav {
 .tips-list strong { color: var(--ink-2); font-weight: 600; }
 
 /* =========================================================
-   FOOTER
+   FOOTER — 3-COLUMN SIDE-BY-SIDE
    ========================================================= */
 footer {
-  padding: 10px 6vw 8px; border-top: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 8px; position: relative;
+  padding: 16px 6vw 12px;
+  border-top: 1px solid var(--line);
+  background: linear-gradient(to bottom, transparent, rgba(6,13,31,.5));
+  position: relative; overflow: visible;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 10px;
 }
 footer::before {
   content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   width: 400px; height: 1px;
   background: linear-gradient(to right, transparent, var(--cyan), var(--violet), transparent);
 }
-.footer-left img { height: 30px; width: auto; max-width: 100%; object-fit: contain; }
-.footer-center { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); }
+.footer-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.footer-left img { height: 24px; width: auto; object-fit: contain; }
+.footer-center {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+}
 .fn-glow {
   font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 800; color: #fff; opacity: 0.5;
   text-shadow: 0 0 8px var(--cyan), 0 0 12px var(--violet), 0 0 18px var(--coral);
@@ -516,9 +531,15 @@ footer::before {
   0% { text-shadow: 0 0 8px var(--cyan), 0 0 12px var(--violet); transform: scale(1); }
   100% { text-shadow: 0 0 12px var(--cyan), 0 0 18px var(--violet), 0 0 25px var(--coral); transform: scale(1.1); }
 }
-.footer-right { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
 .logo-dept { height: 27px; width: auto; max-width: 100%; object-fit: contain; }
-.logo-club { height: 14px; width: auto; max-width: 100%; object-fit: contain; transform: translateX(7px); }
+.logo-club { height: 14px; width: auto; max-width: 100%; object-fit: contain; }
 
 /* =========================================================
    RESPONSIVE — FULL MOBILE / TABLET / DESKTOP
@@ -556,8 +577,6 @@ footer::before {
   .upload-row { font-size: .78rem; }
   .filters { grid-template-columns: 1fr 1fr; gap: 8px; }
   .tips-card { padding: 18px 16px; }
-  footer { flex-direction: column; align-items: flex-start; }
-  .footer-right { align-items: flex-start; }
 }
 
 /* ── Standard phones (≤540px) ── */
@@ -582,13 +601,11 @@ footer::before {
   .filter-btn small { display: none; }
   .tips-card { padding: 16px 14px; margin-top: 16px; }
   .tips-list li { font-size: .8rem; }
-  footer { padding: 16px 4vw 12px; gap: 10px; }
-  .footer-center { position: static; transform: none; padding: 2px 0; }
-  .logo-club { transform: none; }
-  .footer-left img { height: 22px; }
+  footer { padding: 12px 4vw; gap: 6px; }
+  .footer-left img { height: 18px; }
   .logo-dept { height: 20px; }
   .logo-club { height: 11px; }
-  .fn-glow { font-size: .9rem; }
+  .fn-glow { font-size: 0.8rem; }
 }
 
 /* ── Small phones (≤400px — iPhone SE, Galaxy A) ── */
@@ -607,10 +624,10 @@ footer::before {
   .filter-btn .filter-icon { font-size: 1.1rem; }
   .filter-btn .filter-name { font-size: 9.5px; }
   .stage-controls .btn { font-size: 10px; padding: 8px 8px; }
-  .footer-left img { height: 17px; }
-  .logo-dept { height: 15px; }
+  .footer-left img { height: 14px; }
+  .logo-dept { height: 16px; }
   .logo-club { height: 9px; }
-  .fn-glow { font-size: .8rem; }
+  .fn-glow { font-size: 0.72rem; }
   /* Reduce GPU-heavy blur on low-end mobile */
   .mesh-orb { filter: blur(50px) !important; }
   .orb1 { width: 220px !important; height: 220px !important; }
@@ -867,8 +884,16 @@ const filterBtns     = document.querySelectorAll('.filter-btn');
 const filterBadge    = document.getElementById('filterBadge');
 
 let originalImageData = null;
+let aiGeneratedImageData = null;
+let isAIFilterActive = false;
 let streamRef = null;
 let currentFacingMode = 'user'; // 'user' is front camera, 'environment' is back camera
+
+const localFilters = ['none', 'cute', 'matrix', 'binary', 'circuit', 'terminal'];
+const aiFilters = [
+  'paper_camera', 'cartoon_doodle', 'magazine', 'folk_art',
+  'pixel_retro', 'pen_sketch', 'pastel_coder', 'comic_action'
+];
 
 const filterNames = {
   none: 'Original',
@@ -985,6 +1010,8 @@ function finishCapture() {
   downloadBtn.style.display = 'inline-flex';
   stopExistingStream();
   originalImageData = pctx.getImageData(0, 0, photoCanvas.width, photoCanvas.height);
+  aiGeneratedImageData = null;
+  isAIFilterActive = false;
   updateDownload(); updateBadge('none');
 }
 
@@ -998,6 +1025,8 @@ retakeBtn.addEventListener('click', () => {
   filterBtns.forEach(b => b.classList.remove('active'));
   filterBadge.classList.remove('show');
   fileInput.value = ''; originalImageData = null;
+  aiGeneratedImageData = null;
+  isAIFilterActive = false;
 });
 
 filterBtns.forEach(btn => {
@@ -1006,9 +1035,16 @@ filterBtns.forEach(btn => {
       placeholderMsg.innerHTML = '<span class="icon">⚠️</span>Take or upload a photo first!<span class="hint">Then select a filter.</span>';
       placeholderMsg.style.display = 'block'; return;
     }
+
+    const filterType = btn.dataset.f;
+    if (isAIFilterActive && aiFilters.includes(filterType)) {
+      alert("AI generated filters can only be applied to raw/original pictures. Please click 'Retake' to take/upload a new photo.");
+      return;
+    }
+
     filterBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    applyFilter(btn.dataset.f); updateBadge(btn.dataset.f);
+    applyFilter(filterType); updateBadge(filterType);
   });
 });
 
@@ -1017,21 +1053,29 @@ function updateBadge(name) {
   filterBadge.classList.toggle('show', name !== 'none');
 }
 function resetCanvas() {
-  if (!originalImageData) return;
-  photoCanvas.width = originalImageData.width;
-  photoCanvas.height = originalImageData.height;
-  pctx.putImageData(originalImageData, 0, 0);
+  if (isAIFilterActive && aiGeneratedImageData) {
+    photoCanvas.width = aiGeneratedImageData.width;
+    photoCanvas.height = aiGeneratedImageData.height;
+    pctx.putImageData(aiGeneratedImageData, 0, 0);
+  } else if (originalImageData) {
+    photoCanvas.width = originalImageData.width;
+    photoCanvas.height = originalImageData.height;
+    pctx.putImageData(originalImageData, 0, 0);
+  }
 }
 
 function applyFilter(name) {
-  resetCanvas();
-  const w = photoCanvas.width, h = photoCanvas.height;
-  
   if (name === 'none') {
+    isAIFilterActive = false;
+    aiGeneratedImageData = null;
+    resetCanvas();
     updateDownload();
     return;
   }
   
+  resetCanvas();
+  const w = photoCanvas.width, h = photoCanvas.height;
+
   // Local Filters
   if (name === 'cute') { cutePolaroid(w, h); updateDownload(); return; }
   if (name === 'matrix') { matrixRain(w, h); updateDownload(); return; }
@@ -1107,6 +1151,11 @@ async function generateAIImage(filterType, base64Image) {
         photoCanvas.width = img.width;
         photoCanvas.height = img.height;
         pctx.drawImage(img, 0, 0);
+
+        // Save the AI image snapshot
+        aiGeneratedImageData = pctx.getImageData(0, 0, img.width, img.height);
+        isAIFilterActive = true;
+
         updateDownload();
         loader.classList.remove('show');
       };
