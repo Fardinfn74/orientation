@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Booth — UITS IT Fresher Orientation 2026</title>
+<meta name="description" content="UITS IT Department Fresher Photo Booth. Take a selfie, pick a filter — Cute Polaroid, Glitch Cyberpunk, Matrix Rain and more. Download and share.">
+<meta name="author" content="Department of Information Technology, UITS">
+<meta name="theme-color" content="#060d1f">
+<meta property="og:title" content="UITS IT Fresher Photo Booth 2026">
+<meta property="og:description" content="Strike a pose and pick a filter. 7 creative filters — from cute polaroid to full cyberpunk terminal.">
+<meta property="og:url" content="https://uits-it-orientation.vercel.app/photobooth">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   DESIGN TOKENS — MATCHES index.html PREMIUM SYSTEM
+   ========================================================= */
+:root {
+  --bg:      #060d1f;
+  --bg-2:    #091222;
+  --bg-3:    #0d1a30;
+  --surface: #111d35;
+  --surf-2:  #162240;
+  --surf-3:  #1c2a4a;
+  --cyan:    #2dd4bf;
+  --cyan-2:  #14b8a6;
+  --cyan-hi: #5eead4;
+  --violet:  #7c6bf3;
+  --violet-2:#6356e5;
+  --violet-hi:#a78bfa;
+  --coral:   #f472b6;
+  --gold:    #fbbf24;
+  --green:   #34d399;
+  --ink:     #e2e8f8;
+  --ink-2:   #c4cde0;
+  --ink-dim: #7b8db0;
+  --ink-mute:#4a5a7a;
+  --danger:  #f87171;
+  --line:    #1e2d4d;
+  --line-2:  #253555;
+  --line-hi: rgba(45,212,191,.25);
+  --glow-cyan:   0 0 30px rgba(45,212,191,.25), 0 0 60px rgba(45,212,191,.1);
+  --shadow-card: 0 8px 32px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
+  --shadow-deep: 0 20px 60px rgba(0,0,0,.6), 0 4px 16px rgba(0,0,0,.4);
+  --neo-light: rgba(255,255,255,.04);
+  --neo-dark:  rgba(0,0,0,.35);
+  --radius: 16px;
+  --t: .3s cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden; min-height: 100vh;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+::selection { background: rgba(124,107,243,.5); color: #fff; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+
+/* =========================================================
+   MESH BACKGROUND
+   ========================================================= */
+#meshBg {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+}
+.mesh-orb { position: absolute; border-radius: 50%; filter: blur(90px); animation: orbDrift 20s ease-in-out infinite; }
+.orb1 { width:500px;height:500px;background:radial-gradient(circle,rgba(45,212,191,.07),transparent 70%); top:-150px;left:-80px; animation-delay:0s; }
+.orb2 { width:400px;height:400px;background:radial-gradient(circle,rgba(124,107,243,.07),transparent 70%); top:30%;right:-100px; animation-delay:-8s; }
+.orb3 { width:600px;height:600px;background:radial-gradient(circle,rgba(244,114,182,.04),transparent 70%); bottom:-150px;left:25%; animation-delay:-15s; }
+@keyframes orbDrift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(35px,-25px) scale(1.04)} 66%{transform:translate(-25px,40px) scale(.97)} }
+
+/* =========================================================
+   CURSOR GLOW
+   ========================================================= */
+#cursorGlow {
+  position: fixed; width:300px;height:300px;border-radius:50%;
+  background: radial-gradient(circle,rgba(45,212,191,.055) 0%,transparent 70%);
+  pointer-events:none; z-index:1; transform:translate(-50%,-50%); transition:opacity .4s;
+}
+
+/* =========================================================
+   NAV — GLASSMORPHISM
+   ========================================================= */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 6vw; height: 64px;
+  background: rgba(6,13,31,.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(30,45,77,.8);
+  box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 4px 20px rgba(0,0,0,.3);
+}
+.logo {
+  text-decoration: none; display: flex; align-items: center; gap: 11px;
+  font-weight: 700; font-size: 1rem;
+}
+.logo img {
+  height: 36px; width: auto;
+  filter: brightness(0) invert(1) opacity(.85);
+  transition: opacity var(--t);
+}
+.logo img:hover { opacity: 1; }
+.logo-text { font-family: 'JetBrains Mono', monospace; color: var(--ink-2); }
+.logo-text em { color: var(--cyan); font-style: normal; }
+.nav-back {
+  display: inline-flex; align-items: center; gap: 9px;
+  color: var(--ink-dim); text-decoration: none; font-size: 13px; font-weight: 500;
+  padding: 8px 16px; border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: rgba(17,29,53,.6);
+  backdrop-filter: blur(10px);
+  transition: color var(--t), border-color var(--t), background var(--t);
+}
+.nav-back:hover { color: var(--cyan); border-color: var(--line-hi); background: rgba(45,212,191,.06); }
+.nav-back svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+/* =========================================================
+   PAGE HERO
+   ========================================================= */
+.pb-hero {
+  position: relative; overflow: hidden;
+  padding: 80px 6vw 64px; text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+.pb-hero::before {
+  content: ''; position: absolute; top: -140px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 460px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(45,212,191,.1) 0%, rgba(124,107,243,.05) 50%, transparent 75%);
+  pointer-events: none; animation: heroPulse 5s ease-in-out infinite;
+}
+@keyframes heroPulse { 0%,100%{opacity:.7;transform:translateX(-50%) scale(1)} 50%{opacity:1;transform:translateX(-50%) scale(1.06)} }
+
+/* Camera emoji floating rings */
+.hero-cam-ring {
+  position: absolute; border-radius: 50%; border: 1px solid;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  animation: ringExpand 4s ease-out infinite;
+  pointer-events: none;
+}
+.ring1 { width:120px;height:120px; border-color:rgba(45,212,191,.15); animation-delay:0s; }
+.ring2 { width:220px;height:220px; border-color:rgba(45,212,191,.08); animation-delay:-1.3s; }
+.ring3 { width:340px;height:340px; border-color:rgba(45,212,191,.04); animation-delay:-2.6s; }
+@keyframes ringExpand { 0%{opacity:.8;transform:translate(-50%,-50%) scale(.7)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)} }
+
+.pb-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan);
+  margin-bottom: 18px; letter-spacing: .6px;
+  padding: 5px 14px; border: 1px solid rgba(45,212,191,.2); border-radius: 999px;
+  background: rgba(45,212,191,.05); position: relative;
+}
+.pb-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.6)} }
+
+.pb-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 700;
+  background: linear-gradient(120deg, #fff 0%, var(--cyan-hi) 45%, var(--violet-hi) 85%, var(--coral) 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin-bottom: 16px; position: relative;
+  animation: gradShift 6s ease-in-out infinite;
+}
+@keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+.pb-sub { color: var(--ink-dim); font-size: 1.02rem; max-width: 520px; margin: 0 auto 28px; line-height: 1.75; position: relative; }
+
+.filter-previews { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; position: relative; }
+.fp {
+  padding: 5px 13px; border-radius: 999px; font-size: 11.5px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; border: 1px solid;
+  backdrop-filter: blur(8px); cursor: default;
+  transition: transform var(--t);
+}
+.fp:hover { transform: translateY(-2px); }
+.fp-cyan   { background: rgba(45,212,191,.1);  border-color: rgba(45,212,191,.25);  color: var(--cyan-hi); }
+.fp-violet { background: rgba(124,107,243,.1); border-color: rgba(124,107,243,.25); color: var(--violet-hi); }
+.fp-coral  { background: rgba(244,114,182,.1); border-color: rgba(244,114,182,.25); color: var(--coral); }
+.fp-gold   { background: rgba(251,191,36,.1);  border-color: rgba(251,191,36,.25);  color: var(--gold); }
+
+/* =========================================================
+   MAIN BOOTH LAYOUT
+   ========================================================= */
+.booth-page { max-width: 1200px; margin: 0 auto; padding: 60px 6vw 80px; }
+.booth-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: start; }
+@media (max-width: 900px) { .booth-layout { grid-template-columns: 1fr; } }
+
+/* =========================================================
+   CAMERA STAGE — NEOMORPHIC
+   ========================================================= */
+.stage-wrap {
+  background: linear-gradient(145deg, var(--surface) 0%, var(--bg-3) 100%);
+  border: 1px solid var(--line-2);
+  border-radius: 22px; padding: 26px;
+  box-shadow: var(--shadow-deep), inset 0 1px 0 var(--neo-light), inset 0 -1px 0 var(--neo-dark);
+}
+.stage-label {
+  font-family: 'JetBrains Mono', monospace; color: var(--cyan);
+  font-size: 10.5px; margin-bottom: 14px; letter-spacing: .7px;
+  display: flex; align-items: center; gap: 7px;
+}
+.stage-label::before { content: ''; width: 14px; height: 1px; background: var(--cyan); display: block; }
+
+.stage {
+  position: relative; background: #020914; border-radius: 14px; overflow: hidden;
+  min-height: 320px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line);
+  box-shadow: inset 0 0 60px rgba(0,0,0,.8), 0 0 0 1px rgba(45,212,191,.04);
+}
+/* CRT scanline overlay */
+.stage::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: 14px;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.05) 3px, rgba(0,0,0,.05) 4px);
+  z-index: 3;
+}
+.stage video, .stage canvas {
+  width: 100%; height: auto; max-height: 70vh; object-fit: contain; display: block; position: relative; z-index: 2;
+}
+
+.stage-placeholder {
+  color: var(--ink-dim); font-size: .88rem; text-align: center; padding: 32px 24px;
+  font-family: 'JetBrains Mono', monospace; line-height: 2.1; position: relative; z-index: 1;
+}
+.stage-placeholder .icon {
+  font-size: 3.5rem; display: block; margin-bottom: 14px;
+  animation: camFloat 2.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(45,212,191,.4));
+}
+@keyframes camFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.stage-placeholder .hint {
+  color: var(--ink-mute); font-size: .74rem; margin-top: 10px;
+  display: block; font-family: 'Inter', sans-serif;
+}
+
+/* Active filter name on top of stage */
+.active-filter-badge {
+  position: absolute; top: 12px; right: 12px; z-index: 10;
+  padding: 4px 12px; border-radius: 999px; font-size: 10.5px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(6,13,31,.85); backdrop-filter: blur(10px);
+  border: 1px solid var(--cyan); color: var(--cyan);
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+  box-shadow: 0 0 12px rgba(45,212,191,.2);
+}
+.active-filter-badge.show { opacity: 1; }
+
+/* =========================================================
+   AI LOADING OVERLAY
+   ========================================================= */
+.ai-loading-overlay {
+  position: absolute; inset: 0; z-index: 20;
+  background: rgba(6,13,31,0.85); backdrop-filter: blur(8px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
+}
+.ai-loading-overlay.show { opacity: 1; visibility: visible; }
+.ai-spinner {
+  width: 48px; height: 48px;
+  border: 3px solid rgba(45,212,191,.15);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+  box-shadow: 0 0 20px rgba(45,212,191,.25);
+  transition: opacity .3s;
+}
+.ai-spinner.hidden { opacity: 0; pointer-events: none; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.ai-loading-text {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--cyan);
+  letter-spacing: 1px; font-weight: 600;
+  animation: pulse 1.5s ease-in-out infinite;
+  max-width: 280px; text-align: center; line-height: 1.5;
+}
+.ai-loading-text.error { animation: none; color: var(--danger); }
+
+.stage-controls { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+
+.upload-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 14px; font-size: .82rem; color: var(--ink-dim);
+}
+.upload-label {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border: 1px dashed var(--line-2); border-radius: 10px;
+  cursor: pointer; transition: border-color var(--t), background var(--t), color var(--t);
+  font-size: .82rem; color: var(--ink-dim); font-weight: 500;
+}
+.upload-label:hover { border-color: var(--cyan); background: rgba(45,212,191,.05); color: var(--cyan); }
+#fileInput { display: none; }
+#downloadBtn { display: none; }
+
+/* Buttons */
+.btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+  padding: 11px 22px; border-radius: 11px;
+  border: 1px solid var(--line-2);
+  text-decoration: none; color: var(--ink);
+  transition: transform var(--t), border-color var(--t), box-shadow var(--t), background var(--t);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  white-space: nowrap; background: rgba(17,29,53,.7); backdrop-filter: blur(10px);
+  position: relative; overflow: hidden;
+}
+.btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.06) 0%, transparent 50%);
+  opacity: 0; transition: opacity var(--t);
+}
+.btn:hover::before { opacity: 1; }
+.btn.primary {
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  color: #060d1f; border: none; font-weight: 700;
+  box-shadow: 0 4px 20px rgba(45,212,191,.3);
+}
+.btn:hover { transform: translateY(-2px); border-color: var(--line-hi); box-shadow: 0 6px 24px rgba(45,212,191,.15); }
+.btn.primary:hover { box-shadow: 0 8px 30px rgba(45,212,191,.5); }
+.btn.danger { border-color: rgba(244,114,182,.4); color: var(--coral); }
+.btn.danger:hover { background: rgba(244,114,182,.08); border-color: var(--coral); }
+
+/* =========================================================
+   FILTER PANEL — NEOMORPHIC
+   ========================================================= */
+.filter-panel {
+  background: linear-gradient(145deg, var(--surface) 0%, var(--bg-3) 100%);
+  border: 1px solid var(--line-2);
+  border-radius: 22px; padding: 26px;
+  box-shadow: var(--shadow-deep), inset 0 1px 0 var(--neo-light), inset 0 -1px 0 var(--neo-dark);
+}
+.filter-panel-tag {
+  font-family: 'JetBrains Mono', monospace; color: var(--cyan);
+  font-size: 10.5px; letter-spacing: .7px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 7px;
+}
+.filter-panel-tag::before { content: ''; width: 14px; height: 1px; background: var(--cyan); display: block; }
+.filter-panel-title { font-size: 1.08rem; font-weight: 800; color: var(--ink-2); margin-bottom: 4px; }
+.filter-panel-sub { color: var(--ink-dim); font-size: .82rem; margin-bottom: 20px; }
+
+.filters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .filters { grid-template-columns: 1fr; } }
+
+.filter-btn {
+  background: var(--bg-3);
+  border: 1px solid var(--line); border-radius: 13px;
+  padding: 16px 14px; text-align: left; cursor: pointer; color: var(--ink);
+  transition: all var(--t); position: relative; overflow: hidden;
+  box-shadow: inset 0 1px 0 var(--neo-light);
+}
+.filter-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(45,212,191,.04), transparent 70%);
+  opacity: 0; transition: opacity var(--t);
+}
+.filter-btn:hover::before { opacity: 1; }
+.filter-btn .filter-icon { font-size: 1.5rem; display: block; margin-bottom: 9px; }
+.filter-btn .filter-name {
+  display: block; margin-bottom: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700; color: var(--ink-2);
+}
+.filter-btn small { display: block; color: var(--ink-dim); font-size: .71rem; font-weight: 400; line-height: 1.4; }
+.filter-btn:hover {
+  border-color: var(--line-hi);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0,0,0,.35), inset 0 1px 0 var(--neo-light);
+}
+.filter-btn.active {
+  border-color: rgba(45,212,191,.4);
+  background: rgba(45,212,191,.06);
+  box-shadow: 0 0 0 1px rgba(45,212,191,.15), 0 10px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(45,212,191,.1);
+}
+.filter-btn.active .filter-name { color: var(--cyan); }
+.filter-btn.active small { color: rgba(45,212,191,.6); }
+.filter-btn.active::after {
+  content: '✓'; position: absolute; top: 10px; right: 12px;
+  font-size: 10px; color: var(--cyan); font-weight: 700;
+  background: rgba(45,212,191,.12); border: 1px solid rgba(45,212,191,.2);
+  border-radius: 50%; width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* =========================================================
+   TIPS CARD
+   ========================================================= */
+.tips-card {
+  margin-top: 22px;
+  background: var(--bg-3); border: 1px solid var(--line-2); border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: inset 0 1px 0 var(--neo-light);
+}
+.tips-tag {
+  font-family: 'JetBrains Mono', monospace; color: var(--violet-hi);
+  font-size: 10.5px; letter-spacing: .7px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 7px;
+}
+.tips-tag::before { content: ''; width: 14px; height: 1px; background: var(--violet-hi); display: block; }
+.tips-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.tips-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: .84rem; color: var(--ink-dim); line-height: 1.6;
+}
+.tips-list li span { color: var(--cyan); flex-shrink: 0; margin-top: 1px; font-size: 1rem; }
+.tips-list strong { color: var(--ink-2); font-weight: 600; }
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer {
+  padding: 20px 6vw 16px; border-top: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px; position: relative;
+}
+footer::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 1px;
+  background: linear-gradient(to right, transparent, var(--cyan), var(--violet), transparent);
+}
+.footer-left img { height: 60px; width: auto; max-width: 100%; object-fit: contain; }
+.footer-center { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); }
+.fn-glow {
+  font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 800; color: #fff; opacity: 0.5;
+  text-shadow: 0 0 8px var(--cyan), 0 0 12px var(--violet), 0 0 18px var(--coral);
+  animation: pulseGlow 2s infinite alternate;
+  display: inline-block;
+}
+@keyframes pulseGlow {
+  0% { text-shadow: 0 0 8px var(--cyan), 0 0 12px var(--violet); transform: scale(1); }
+  100% { text-shadow: 0 0 12px var(--cyan), 0 0 18px var(--violet), 0 0 25px var(--coral); transform: scale(1.1); }
+}
+.footer-right { display: flex; flex-direction: column; gap: 7px; align-items: flex-end; }
+.logo-dept { height: 55px; width: auto; max-width: 100%; object-fit: contain; }
+.logo-club { height: 27px; width: auto; max-width: 100%; object-fit: contain; transform: translateX(14px); }
+
+/* =========================================================
+   RESPONSIVE — FULL MOBILE / TABLET / DESKTOP
+   ========================================================= */
+
+/* ── Tablet landscape (≤900px) ── */
+@media (max-width: 900px) {
+  .booth-layout { grid-template-columns: 1fr; }
+  .booth-page { padding: 44px 5vw 60px; }
+  .pb-hero { padding: 64px 5vw 52px; }
+  .pb-title { font-size: clamp(1.7rem, 5vw, 2.8rem); }
+  .logo-dept { height: 40px; }
+}
+
+/* ── Tablet portrait (≤768px) ── */
+@media (max-width: 768px) {
+  nav { padding: 0 5vw; }
+  .pb-hero { padding: 52px 5vw 44px; }
+  .pb-title { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+  .pb-sub { font-size: .93rem; }
+  .stage { min-height: 260px; }
+  .stage-controls { gap: 8px; }
+  .stage-controls .btn { padding: 10px 16px; font-size: 12px; }
+  .filters { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .filter-btn { padding: 13px 11px; }
+  .filter-btn .filter-icon { font-size: 1.3rem; margin-bottom: 6px; }
+  .filter-btn .filter-name { font-size: 10.5px; }
+}
+
+/* ── Large phones (≤660px) ── */
+@media (max-width: 660px) {
+  .booth-page { padding: 32px 4vw 50px; }
+  .stage-wrap, .filter-panel { padding: 18px 16px; }
+  .stage { min-height: 220px; }
+  .upload-row { font-size: .78rem; }
+  .filters { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tips-card { padding: 18px 16px; }
+  footer { flex-direction: column; align-items: flex-start; }
+  .footer-right { align-items: flex-start; }
+}
+
+/* ── Standard phones (≤540px) ── */
+@media (max-width: 540px) {
+  nav { height: 58px; padding: 0 4vw; }
+  .logo img { height: 30px; }
+  .logo-text { font-size: .88rem; }
+  .pb-hero { padding: 48px 4vw 38px; }
+  .pb-title { font-size: clamp(1.3rem, 7.5vw, 1.9rem); }
+  .filter-previews { gap: 6px; }
+  .fp { font-size: 10.5px; padding: 4px 10px; }
+  .booth-page { padding: 24px 4vw 40px; }
+  .stage-wrap, .filter-panel { padding: 16px 14px; border-radius: 16px; }
+  .stage { min-height: 200px; border-radius: 10px; }
+  .stage-controls { flex-wrap: wrap; gap: 7px; }
+  .stage-controls .btn { flex: 1 1 40%; justify-content: center; font-size: 12px; padding: 10px 12px; }
+  .upload-row { flex-wrap: wrap; }
+  .filters { grid-template-columns: 1fr 1fr; gap: 7px; }
+  .filter-btn { padding: 12px 10px; border-radius: 11px; }
+  .filter-btn .filter-icon { font-size: 1.2rem; margin-bottom: 5px; }
+  .filter-btn .filter-name { font-size: 10px; }
+  .filter-btn small { display: none; }
+  .tips-card { padding: 16px 14px; margin-top: 16px; }
+  .tips-list li { font-size: .8rem; }
+  footer { padding: 16px 4vw 12px; gap: 10px; }
+  .footer-center { position: static; transform: none; padding: 2px 0; }
+  .logo-club { transform: none; }
+  .footer-left img { height: 44px; }
+  .logo-dept { height: 40px; }
+  .logo-club { height: 22px; }
+  .fn-glow { font-size: .9rem; }
+}
+
+/* ── Small phones (≤400px — iPhone SE, Galaxy A) ── */
+@media (max-width: 400px) {
+  html { font-size: 15px; }
+  nav { height: 54px; }
+  .pb-hero { padding: 40px 4vw 32px; }
+  .pb-title { font-size: clamp(1.15rem, 8vw, 1.6rem); }
+  .pb-sub { font-size: .84rem; }
+  .pb-tag { font-size: 10.5px; }
+  .booth-page { padding: 18px 3vw 32px; }
+  .stage-wrap, .filter-panel { padding: 12px; border-radius: 14px; }
+  .stage { min-height: 180px; }
+  .filters { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .filter-btn { padding: 10px 8px; border-radius: 10px; }
+  .filter-btn .filter-icon { font-size: 1.1rem; }
+  .filter-btn .filter-name { font-size: 9.5px; }
+  .stage-controls .btn { font-size: 11px; padding: 9px 10px; }
+  .footer-left img { height: 34px; }
+  .logo-dept { height: 30px; }
+  .logo-club { height: 18px; }
+  .fn-glow { font-size: .8rem; }
+}
+
+/* ── Very small (≤320px) ── */
+@media (max-width: 320px) {
+  .pb-title { font-size: 1.1rem; }
+  .filters { grid-template-columns: 1fr 1fr; gap: 5px; }
+  .filter-btn .filter-name { font-size: 9px; }
+  .stage { min-height: 160px; }
+}
+</style>
+</head>
+<body>
+
+<!-- MESH BACKGROUND -->
+<div id="meshBg" aria-hidden="true">
+  <div class="mesh-orb orb1"></div>
+  <div class="mesh-orb orb2"></div>
+  <div class="mesh-orb orb3"></div>
+</div>
+
+<!-- CURSOR GLOW -->
+<div id="cursorGlow" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav role="navigation" aria-label="Site navigation">
+  <a class="logo" href="index.html" aria-label="Back to UITS IT Orientation Home">
+    <img src="Photos/UITS IT DEPARTMENT LOGO-01.png" alt="UITS IT Department">
+    <span class="logo-text mono">UITS <em>// IT</em></span>
+  </a>
+  <a href="index.html" class="nav-back" aria-label="Go back to main orientation page">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Back to Orientation
+  </a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="pb-hero" role="banner">
+  <div class="hero-cam-ring ring1" aria-hidden="true"></div>
+  <div class="hero-cam-ring ring2" aria-hidden="true"></div>
+  <div class="hero-cam-ring ring3" aria-hidden="true"></div>
+  <div class="pb-tag mono"><span class="pb-tag-dot"></span>04 · ./photobooth --run</div>
+  <h1 class="pb-title">Fresher Photo Booth 📸</h1>
+  <p class="pb-sub">Snap a photo, pick a filter, download and share. Welcome to IT — let's make it memorable.</p>
+</div>
+
+<!-- MAIN BOOTH -->
+<div class="booth-page">
+  <div class="booth-layout">
+
+    <!-- Camera Stage -->
+    <div class="stage-wrap">
+      <div class="stage-label mono">CAMERA FEED</div>
+      <div class="stage" id="stage" aria-label="Photo booth preview">
+        <video id="video" autoplay playsinline muted aria-label="Live camera feed" style="display:none;"></video>
+        <canvas id="photoCanvas" style="display:none;" aria-label="Captured and filtered photo"></canvas>
+        <div class="stage-placeholder" id="placeholderMsg" aria-live="polite">
+          <span class="icon" aria-hidden="true">📷</span>
+          Click <strong>Start Camera</strong> to begin<br>
+          <span class="hint">Or upload a photo below if camera isn't available</span>
+        </div>
+        <div class="active-filter-badge" id="filterBadge" aria-live="polite"></div>
+        <div class="ai-loading-overlay" id="aiLoader">
+          <div class="ai-spinner"></div>
+          <div class="ai-loading-text">GENERATING AI IMAGE...</div>
+        </div>
+      </div>
+
+      <div class="stage-controls">
+        <button class="btn primary" id="startCam">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+          Start Camera
+        </button>
+        <button class="btn" id="capture" style="display:none;">📸 Capture</button>
+        <button class="btn danger" id="retake" style="display:none;">↺ Retake</button>
+        <a class="btn" id="downloadBtn" download="uits-it-fresher-2026.png">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          Download
+        </a>
+      </div>
+
+      <div class="upload-row">
+        <span>No camera?</span>
+        <label class="upload-label" for="fileInput">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.11 0-2 .89-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2zm-6 10v-3H9v-2h5V8l4 4-4 4z"/></svg>
+          Upload a photo
+        </label>
+        <input type="file" id="fileInput" accept="image/*" aria-label="Upload a photo file">
+      </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel">
+      <div class="filter-panel-tag mono">SELECT FILTER</div>
+      <div class="filter-panel-title">Pick your style</div>
+      <div class="filter-panel-sub">Capture first, then apply a filter.</div>
+
+      <div class="filters" id="filterList" role="group" aria-label="Photo filters">
+        <button class="filter-btn" data-f="none">
+          <span class="filter-icon">🖼️</span>
+          <span class="filter-name">Original</span>
+        </button>
+
+        <!-- OLD LOCAL FILTERS -->
+        <button class="filter-btn" data-f="cute">
+          <span class="filter-icon">🤍</span>
+          <span class="filter-name">Cute Polaroid</span>
+        </button>
+        <button class="filter-btn" data-f="matrix">
+          <span class="filter-icon" style="font-family:monospace;font-size:1.1rem;font-weight:700;">01</span>
+          <span class="filter-name">Matrix Rain</span>
+        </button>
+        <button class="filter-btn" data-f="binary">
+          <span class="filter-icon">◆</span>
+          <span class="filter-name">Binary Duotone</span>
+        </button>
+        <button class="filter-btn" data-f="circuit">
+          <span class="filter-icon">⊡</span>
+          <span class="filter-name">Circuit Badge</span>
+        </button>
+        <button class="filter-btn" data-f="terminal">
+          <span class="filter-icon" style="font-family:monospace;font-size:1.1rem;font-weight:700;">&gt;_</span>
+          <span class="filter-name">Terminal Frame</span>
+        </button>
+
+        <!-- NEW AI FILTERS -->
+        <button class="filter-btn" data-f="paper_camera">
+          <span class="filter-icon">✨</span>
+          <span class="filter-name">Paper Camera</span>
+        </button>
+        <button class="filter-btn" data-f="cartoon_doodle">
+          <span class="filter-icon">✏️</span>
+          <span class="filter-name">Cartoon Overlay</span>
+        </button>
+        <button class="filter-btn" data-f="magazine">
+          <span class="filter-icon">📖</span>
+          <span class="filter-name">Tokyo Magazine</span>
+        </button>
+        <button class="filter-btn" data-f="folk_art">
+          <span class="filter-icon">🧸</span>
+          <span class="filter-name">Folk Illustration</span>
+        </button>
+        <button class="filter-btn" data-f="pixel_retro">
+          <span class="filter-icon">👾</span>
+          <span class="filter-name">32-Bit Retro</span>
+        </button>
+        <button class="filter-btn" data-f="pen_sketch">
+          <span class="filter-icon">🖊️</span>
+          <span class="filter-name">Notebook Sketch</span>
+        </button>
+        <button class="filter-btn" data-f="pastel_coder">
+          <span class="filter-icon">💻</span>
+          <span class="filter-name">Coder Notes</span>
+        </button>
+        <button class="filter-btn" data-f="comic_action">
+          <span class="filter-icon">💥</span>
+          <span class="filter-name">Action Comic</span>
+        </button>
+      </div>
+
+      <div class="tips-card">
+        <div class="tips-tag mono">TIPS</div>
+        <ul class="tips-list">
+          <li><span>📷</span> Start the camera or upload a photo <strong>first</strong>, then pick a filter.</li>
+          <li><span>💡</span> Good lighting makes every filter look much better!</li>
+          <li><span>📥</span> Hit <strong>Download</strong> to save your filtered photo as a PNG.</li>
+          <li><span>↺</span> Use <strong>Retake</strong> to try a new photo and filter combo.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer role="contentinfo">
+  <div class="footer-left">
+    <img src="Photos/UITS FULL LOGO-01.png" alt="UITS Full Logo">
+  </div>
+  <div class="footer-center">
+    <span class="fn-glow">👾FN👾</span>
+  </div>
+  <div class="footer-right">
+    <img src="Photos/UITS IT DEPARTMENT LOGO-01.png" alt="UITS IT Department" class="logo-dept">
+    <img src="Photos/UITS IT CLUB.png" alt="UITS IT Club" class="logo-club">
+  </div>
+</footer>
+
+<script>
+/* =================== CURSOR GLOW =================== */
+const cursorGlow = document.getElementById('cursorGlow');
+let cx = 0, cy = 0, tx = 0, ty = 0;
+document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; });
+(function animateCursor() {
+  cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
+  cursorGlow.style.left = cx + 'px'; cursorGlow.style.top = cy + 'px';
+  requestAnimationFrame(animateCursor);
+})();
+
+/* =================== PHOTO BOOTH =================== */
+const video          = document.getElementById('video');
+const placeholderMsg = document.getElementById('placeholderMsg');
+const startCamBtn    = document.getElementById('startCam');
+const captureBtn     = document.getElementById('capture');
+const retakeBtn      = document.getElementById('retake');
+const downloadBtn    = document.getElementById('downloadBtn');
+const photoCanvas    = document.getElementById('photoCanvas');
+const pctx           = photoCanvas.getContext('2d');
+const fileInput      = document.getElementById('fileInput');
+const filterBtns     = document.querySelectorAll('.filter-btn');
+const filterBadge    = document.getElementById('filterBadge');
+
+let originalImageData = null;
+let streamRef = null;
+
+const filterNames = {
+  none: 'Original',
+  cute: 'Cute Polaroid',
+  matrix: 'Matrix Rain',
+  binary: 'Binary Duotone',
+  circuit: 'Circuit Badge',
+  terminal: 'Terminal Frame',
+  paper_camera: 'Paper Camera',
+  cartoon_doodle: 'Cartoon Overlay',
+  magazine: 'Tokyo Magazine',
+  folk_art: 'Folk Illustration',
+  pixel_retro: '32-Bit Retro',
+  pen_sketch: 'Notebook Sketch',
+  pastel_coder: 'Coder Notes',
+  comic_action: 'Action Comic'
+};
+
+startCamBtn.addEventListener('click', async () => {
+  try {
+    const constraints = {
+      video: { 
+        facingMode: 'user',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
+      audio: false
+    };
+    streamRef = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = streamRef;
+    video.style.display = 'block';
+    placeholderMsg.style.display = 'none';
+    startCamBtn.style.display = 'none';
+    captureBtn.style.display = 'inline-flex';
+  } catch {
+    placeholderMsg.innerHTML = '<span class="icon">⚠️</span>Camera not available.<span class="hint">Please upload a photo below instead ↓</span>';
+  }
+});
+
+captureBtn.addEventListener('click', () => {
+  const w = video.videoWidth || 1920, h = video.videoHeight || 1080;
+  photoCanvas.width = w; photoCanvas.height = h;
+  pctx.drawImage(video, 0, 0, w, h);
+  finishCapture();
+});
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const img = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  img.onload = () => {
+    photoCanvas.width = img.width; photoCanvas.height = img.height;
+    pctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(objectUrl); // Fix memory leak
+    finishCapture();
+  };
+  img.onerror = () => URL.revokeObjectURL(objectUrl); // Fix memory leak on error
+  img.src = objectUrl;
+});
+
+function finishCapture() {
+  video.style.display = 'none';
+  photoCanvas.style.display = 'block';
+  placeholderMsg.style.display = 'none';
+  startCamBtn.style.display = 'none';
+  captureBtn.style.display = 'none';
+  retakeBtn.style.display = 'inline-flex';
+  downloadBtn.style.display = 'inline-flex';
+  if (streamRef) streamRef.getTracks().forEach(t => t.stop());
+  originalImageData = pctx.getImageData(0, 0, photoCanvas.width, photoCanvas.height);
+  updateDownload(); updateBadge('none');
+}
+
+retakeBtn.addEventListener('click', () => {
+  photoCanvas.style.display = 'none'; video.style.display = 'none';
+  placeholderMsg.innerHTML = '<span class="icon">📷</span>Click <strong>Start Camera</strong> to begin<span class="hint">Or upload a photo below if camera isn\'t available</span>';
+  placeholderMsg.style.display = 'block';
+  startCamBtn.style.display = 'inline-flex';
+  retakeBtn.style.display = 'none'; downloadBtn.style.display = 'none';
+  filterBtns.forEach(b => b.classList.remove('active'));
+  filterBadge.classList.remove('show');
+  fileInput.value = ''; originalImageData = null;
+});
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!originalImageData) {
+      placeholderMsg.innerHTML = '<span class="icon">⚠️</span>Take or upload a photo first!<span class="hint">Then select a filter.</span>';
+      placeholderMsg.style.display = 'block'; return;
+    }
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(btn.dataset.f); updateBadge(btn.dataset.f);
+  });
+});
+
+function updateBadge(name) {
+  filterBadge.textContent = filterNames[name] || name;
+  filterBadge.classList.toggle('show', name !== 'none');
+}
+function resetCanvas() {
+  if (!originalImageData) return;
+  photoCanvas.width = originalImageData.width;
+  photoCanvas.height = originalImageData.height;
+  pctx.putImageData(originalImageData, 0, 0);
+}
+
+function applyFilter(name) {
+  resetCanvas();
+  const w = photoCanvas.width, h = photoCanvas.height;
+  
+  if (name === 'none') {
+    updateDownload();
+    return;
+  }
+  
+  // Local Filters
+  if (name === 'cute') { cutePolaroid(w, h); updateDownload(); return; }
+  if (name === 'matrix') { matrixRain(w, h); updateDownload(); return; }
+  if (name === 'binary') { binaryDuotone(w, h); updateDownload(); return; }
+  if (name === 'circuit') { circuitBadge(w, h); updateDownload(); return; }
+  if (name === 'terminal') { terminalFrame(w, h); updateDownload(); return; }
+  
+  // AI Filters
+  generateAIImage(name, photoCanvas.toDataURL('image/png'));
+}
+
+function showAIError(loader, loaderText, message) {
+  const spinner = loader.querySelector('.ai-spinner');
+  spinner.classList.add('hidden');
+  loaderText.classList.add('error');
+  loaderText.innerHTML = `⚠️ ${message}`;
+  // Remove active class from filter buttons since filter failed
+  filterBtns.forEach(b => b.classList.remove('active'));
+  filterBadge.classList.remove('show');
+  setTimeout(() => {
+    loader.classList.remove('show');
+    spinner.classList.remove('hidden');
+    loaderText.classList.remove('error');
+    resetCanvas();
+    updateBadge('none');
+  }, 5000);
+}
+
+async function generateAIImage(filterType, base64Image) {
+  const loader = document.getElementById('aiLoader');
+  const loaderText = loader.querySelector('.ai-loading-text');
+  const spinner = loader.querySelector('.ai-spinner');
+  
+  // Reset to loading state
+  spinner.classList.remove('hidden');
+  loaderText.classList.remove('error');
+  loaderText.innerHTML = 'ANALYZING IMAGE WITH AI...';
+  loader.classList.add('show');
+  
+  // Animated status text updates
+  const statusMessages = [
+    'ANALYZING IMAGE WITH AI...',
+    'APPLYING STYLE TRANSFER...',
+    'RENDERING FILTER EFFECT...',
+    'FINALIZING OUTPUT...'
+  ];
+  let msgIdx = 0;
+  const statusInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % statusMessages.length;
+    if (!loaderText.classList.contains('error')) {
+      loaderText.innerHTML = statusMessages[msgIdx];
+    }
+  }, 1800);
+
+  const clearStatus = () => clearInterval(statusInterval);
+  
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: base64Image, filterType })
+    });
+    
+    const data = await res.json();
+    clearStatus();
+    
+    if (!res.ok || data.error) {
+      showAIError(loader, loaderText, data.error || 'Unknown error');
+    } else if (data.success && data.imageBase64) {
+      // ✅ Full AI image returned — draw it directly
+      const img = new Image();
+      img.onload = () => {
+        photoCanvas.width = img.width;
+        photoCanvas.height = img.height;
+        pctx.drawImage(img, 0, 0);
+        updateDownload();
+        loader.classList.remove('show');
+      };
+      img.onerror = () => showAIError(loader, loaderText, 'Error loading the returned image.');
+      img.src = data.imageBase64;
+    } else {
+      showAIError(loader, loaderText, 'No image returned from AI. Try again.');
+    }
+  } catch (e) {
+    clearStatus();
+    console.error('AI Generation Error:', e);
+    showAIError(loader, loaderText, 'Connection error. Is the server running?');
+  }
+}
+
+function updateDownload() { downloadBtn.href = photoCanvas.toDataURL('image/png'); }
+
+/* ---- Cute Polaroid ---- */
+function cutePolaroid(w, h) {
+  const imgData = pctx.getImageData(0, 0, w, h), d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    d[i]   = Math.min(255, d[i]   * 1.08 + 14);
+    d[i+1] = Math.min(255, d[i+1] * 1.03 + 6);
+    d[i+2] = Math.min(255, d[i+2] * 0.94 + 8);
+  }
+  
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  const tctx = tmp.getContext('2d');
+  tctx.putImageData(imgData, 0, 0);
+  
+  const grad = tctx.createRadialGradient(w/2, h/2, h/3, w/2, h/2, h * 0.75);
+  grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(120,60,90,0.25)');
+  tctx.fillStyle = grad; tctx.fillRect(0, 0, w, h);
+  
+  const border = Math.round(w * 0.05);
+  const bottomBorder = Math.round(border * 3.5);
+  
+  photoCanvas.width = w + border * 2;
+  photoCanvas.height = h + border + bottomBorder;
+  
+  pctx.fillStyle = '#fff';
+  pctx.fillRect(0, 0, photoCanvas.width, photoCanvas.height);
+  pctx.drawImage(tmp, border, border);
+  
+  pctx.fillStyle = '#555';
+  pctx.font = `${Math.round(h * 0.043)}px "Segoe Script", cursive, sans-serif`;
+  pctx.textAlign = 'center';
+  pctx.fillText("Fresher '26 🤍 UITS IT", photoCanvas.width / 2, photoCanvas.height - border * 1.1);
+}
+
+/* ---- Matrix Rain ---- */
+function matrixRain(w, h) {
+  const imgData = pctx.getImageData(0, 0, w, h), d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const avg = (d[i] + d[i+1] + d[i+2]) / 3;
+    d[i] = avg * 0.12; d[i+1] = avg * 0.52 + 20; d[i+2] = avg * 0.18;
+  }
+  pctx.putImageData(imgData, 0, 0);
+  const cols = Math.floor(w / 15); pctx.font = '13px monospace';
+  for (let c = 0; c < cols; c++) {
+    const len = Math.floor(Math.random() * 12) + 4;
+    const startY = Math.random() * h;
+    for (let r = 0; r < len; r++) {
+      const y = (startY + r * 15) % h;
+      pctx.fillStyle = `rgba(120,255,190,${(1 - r/len) * 0.9})`;
+      pctx.fillText(Math.random() > 0.5 ? '1' : '0', c * 15, y);
+    }
+  }
+  pctx.font = `bold ${Math.round(h * 0.04)}px monospace`;
+  pctx.fillStyle = 'rgba(45,212,191,0.85)'; pctx.textAlign = 'center';
+  pctx.fillText("UITS IT — Fresher '26", w / 2, h - h * 0.05);
+}
+/* ---- Binary Duotone ---- */
+function binaryDuotone(w, h) {
+  const imgData = pctx.getImageData(0, 0, w, h), d = imgData.data;
+  const c1 = [6, 13, 31], c2 = [45, 212, 191];
+  for (let i = 0; i < d.length; i += 4) {
+    const lum = (0.3 * d[i] + 0.59 * d[i+1] + 0.11 * d[i+2]) / 255;
+    d[i]   = c1[0] + (c2[0] - c1[0]) * lum;
+    d[i+1] = c1[1] + (c2[1] - c1[1]) * lum;
+    d[i+2] = c1[2] + (c2[2] - c1[2]) * lum;
+  }
+  pctx.putImageData(imgData, 0, 0);
+  pctx.font = '11px monospace'; pctx.fillStyle = 'rgba(255,255,255,0.14)';
+  for (let y = 10; y < h; y += 13) {
+    let line = '';
+    for (let x = 0; x < w; x += 8) line += Math.random() > 0.5 ? '1' : '0';
+    pctx.fillText(line, 0, y);
+  }
+}
+/* ---- Circuit Badge ---- */
+function circuitBadge(w, h) {
+  pctx.strokeStyle = 'rgba(45,212,191,0.8)'; pctx.lineWidth = 2;
+  function trace(x, y) {
+    pctx.beginPath(); pctx.moveTo(x, y); let cx = x, cy = y;
+    for (let i = 0; i < 5; i++) {
+      if (i % 2 === 0) cx += (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 30);
+      else             cy += (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 30);
+      pctx.lineTo(cx, cy);
+    }
+    pctx.stroke();
+    pctx.fillStyle = 'rgba(45,212,191,0.9)';
+    pctx.beginPath(); pctx.arc(cx, cy, 3.5, 0, Math.PI * 2); pctx.fill();
+  }
+  trace(20, 20); trace(w-20, 20); trace(20, h-20); trace(w-20, h-20);
+  trace(w/2, 20); trace(w/2, h-20);
+  const bw = w * 0.55, bh = h * 0.18, bx = w/2 - bw/2, by = h - bh - 16;
+  pctx.fillStyle = 'rgba(6,13,31,0.85)';
+  pctx.beginPath();
+  if (pctx.roundRect) pctx.roundRect(bx, by, bw, bh, 8); else pctx.rect(bx, by, bw, bh);
+  pctx.fill();
+  pctx.strokeStyle = 'rgba(124,107,243,0.9)'; pctx.lineWidth = 1.5; pctx.stroke();
+  pctx.fillStyle = '#fff';
+  pctx.font = `bold ${Math.round(bh * 0.3)}px monospace`;
+  pctx.textAlign = 'center'; pctx.textBaseline = 'middle';
+  pctx.fillText("UITS.IT DEPT", bx + bw/2, by + bh * 0.35);
+  pctx.fillText("BATCH-58", bx + bw/2, by + bh * 0.65);
+  pctx.textBaseline = 'alphabetic';
+}
+/* ---- Terminal Frame ---- */
+function terminalFrame(w, h) {
+  const snapshot = pctx.getImageData(0, 0, w, h);
+  const barH = h * 0.12, footH = h * 0.1;
+  pctx.fillStyle = '#0d1220'; pctx.fillRect(0, 0, w, h);
+  const tmp = document.createElement('canvas');
+  tmp.width = w; tmp.height = h;
+  tmp.getContext('2d').putImageData(snapshot, 0, 0);
+  pctx.drawImage(tmp, 0, 0, w, h, 0, barH, w, h - barH - footH);
+  pctx.fillStyle = '#1b2338'; pctx.fillRect(0, 0, w, barH);
+  const dotY = barH / 2, r = barH * 0.10, spacing = barH * 0.45;
+  ['#ff5f57','#febc2e','#28c840'].forEach((c, i) => {
+    pctx.fillStyle = c;
+    pctx.beginPath(); pctx.arc(w * 0.04 + i * spacing, dotY, r, 0, Math.PI * 2); pctx.fill();
+  });
+  pctx.fillStyle = 'rgba(255,255,255,0.5)';
+  pctx.font = `${Math.round(barH * 0.38)}px monospace`; pctx.textAlign = 'center';
+  pctx.fillText('fresher@uits-it: ~', w / 2, dotY + barH * 0.15);
+  pctx.fillStyle = '#1b2338'; pctx.fillRect(0, h - footH, w, footH);
+  pctx.fillStyle = '#2dd4bf'; pctx.textAlign = 'left';
+  pctx.font = `${Math.round(footH * 0.33)}px monospace`;
+  pctx.fillText('$ whoami', w * 0.04, h - footH * 0.6);
+  pctx.fillStyle = 'rgba(255,255,255,0.75)';
+  pctx.fillText("> fresher | UITS IT '26", w * 0.04, h - footH * 0.22);
+}
+</script>
+</body>
+</html>
