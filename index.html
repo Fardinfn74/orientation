@@ -164,13 +164,14 @@ a { color: inherit; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* =========================================================
-   NAV — SOLID HIGH VISIBILITY
+   NAV — GLASSMORPHISM (MATCHES PHOTO BOOTH PAGE)
    ========================================================= */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 6vw; height: 64px;
-  background: #060d1f; /* Solid dark background to ensure absolute visibility on mobiles */
+  background: rgba(6,13,31,.78);
+  backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(30,45,77,.8);
   box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 4px 20px rgba(0,0,0,.3);
 }
@@ -181,20 +182,6 @@ nav {
 .logo-img { height: 36px; filter: brightness(0) invert(1) opacity(.85); }
 .logo-text { color: var(--ink-2); }
 .logo-text em { color: var(--cyan); font-style: normal; }
-.nav-links { display: flex; align-items: center; gap: 2px; }
-.nav-links a {
-  color: var(--ink-dim); text-decoration: none; font-size: 13.5px; font-weight: 500;
-  padding: 7px 14px; border-radius: 10px;
-  transition: color var(--t), background var(--t);
-  position: relative;
-}
-.nav-links a:hover { color: var(--ink); background: rgba(255,255,255,.06); }
-.nav-links a.active { color: var(--cyan); }
-.nav-links a.active::after {
-  content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
-  width: 18px; height: 2px; border-radius: 1px;
-  background: linear-gradient(90deg, var(--cyan), var(--violet));
-}
 .nav-cta {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 7px 16px; border-radius: 10px; text-decoration: none;
@@ -211,33 +198,6 @@ nav {
   100% { color: var(--cyan);   border-color: rgba(45,212,191,.4);  background: linear-gradient(135deg,rgba(45,212,191,.12),rgba(124,107,243,.12)); box-shadow: 0 0 12px rgba(45,212,191,.2); }
 }
 .nav-cta:hover { filter: brightness(1.2); transform: scale(1.04); }
-
-#navToggle {
-  display: none; flex-direction: column; gap: 5px;
-  cursor: pointer; background: none; border: none; padding: 5px;
-}
-#navToggle span {
-  display: block; width: 22px; height: 2px; background: var(--ink);
-  border-radius: 2px; transition: transform .35s, opacity .35s;
-}
-#navToggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-#navToggle.open span:nth-child(2) { opacity: 0; }
-#navToggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-@media (max-width: 660px) {
-  #navToggle { display: flex; }
-  .nav-links {
-    position: fixed; top: 64px; left: 0; right: 0;
-    flex-direction: column; align-items: flex-start;
-    background: rgba(6,13,31,.96); backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--line-2);
-    padding: 16px 6vw 24px; gap: 4px;
-    transform: translateY(-110%); transition: transform .4s cubic-bezier(.4,0,.2,1);
-  }
-  .nav-links.open { transform: translateY(0); }
-  .nav-links a { width: 100%; padding: 11px 14px; font-size: 15px; }
-  .nav-cta { display: none; }
-}
 
 /* =========================================================
    SCROLL TO TOP
@@ -771,22 +731,6 @@ footer::before {
   .t-item-inner { padding: 18px 18px; }
 }
 
-/* ── Large phones (≤660px) — nav collapses ── */
-@media (max-width: 660px) {
-  #navToggle { display: flex; }
-  .nav-links {
-    position: fixed; top: 64px; left: 0; right: 0;
-    flex-direction: column; align-items: flex-start;
-    background: rgba(6,13,31,.96); backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--line-2);
-    padding: 16px 6vw 24px; gap: 4px;
-    transform: translateY(-110%); transition: transform .4s cubic-bezier(.4,0,.2,1);
-    z-index: 99;
-  }
-  .nav-links.open { transform: translateY(0); }
-  .nav-links a { width: 100%; padding: 11px 14px; font-size: 15px; }
-  .nav-cta { display: none; }
-}
 
 /* ── Standard phones (≤540px) ── */
 @media (max-width: 540px) {
@@ -823,7 +767,6 @@ footer::before {
   html { font-size: 15px; }
   body { padding-top: 58px; }
   nav { height: 58px; padding: 0 4vw; }
-  .nav-links { top: 58px; }
   #hero { padding: 60px 4vw 50px; min-height: 80vh; }
   h1 { font-size: clamp(1.25rem, 8vw, 1.8rem); line-height: 1.2; }
   .sub { font-size: .88rem; }
@@ -905,15 +848,7 @@ footer::before {
     <img src="Photos/UITS IT DEPARTMENT LOGO-01.png" alt="UITS IT" class="logo-img">
     <span class="logo-text mono">UITS <em>// IT</em></span>
   </a>
-  <button id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="nav-links" id="navLinks">
-    <a href="#welcome" id="nav-welcome">Welcome</a>
-    <a href="#about"   id="nav-about">Department</a>
-    <a href="#schedule" id="nav-schedule">Schedule</a>
-    <a href="photobooth.html" id="nav-booth" class="nav-cta">📸 Photo Booth</a>
-  </div>
+  <a href="photobooth.html" id="nav-booth" class="nav-cta">📸 Photo Booth</a>
 </nav>
 
 <!-- ===== HERO ===== -->
@@ -1287,35 +1222,6 @@ const revealObs = new IntersectionObserver((entries) => {
 }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
-/* =================== ACTIVE NAV =================== */
-const sections   = ['welcome', 'about', 'schedule'];
-const navLinkEls = sections.map(id => document.getElementById(`nav-${id}`));
-const secEls     = sections.map(id => document.getElementById(id));
-const navObs = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const idx = sections.indexOf(entry.target.id);
-      navLinkEls.forEach((l, i) => l && l.classList.toggle('active', i === idx));
-    }
-  });
-}, { threshold: 0.3 });
-secEls.forEach(el => el && navObs.observe(el));
-
-/* =================== MOBILE NAV =================== */
-const navToggle  = document.getElementById('navToggle');
-const navLinksEl = document.getElementById('navLinks');
-navToggle.addEventListener('click', () => {
-  const open = navLinksEl.classList.toggle('open');
-  navToggle.classList.toggle('open', open);
-  navToggle.setAttribute('aria-expanded', open);
-});
-navLinksEl.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
-    navLinksEl.classList.remove('open');
-    navToggle.classList.remove('open');
-    navToggle.setAttribute('aria-expanded', 'false');
-  });
-});
 
 /* =================== SCROLL TO TOP =================== */
 const scrollTopBtn = document.getElementById('scrollTop');
