@@ -1144,40 +1144,115 @@ async function generateAIImage(filterType, base64Image) {
 
   const clearStatus = () => clearInterval(statusInterval);
   
-  try {
-    const prompt = filterPrompts[filterType];
-    if (!prompt) {
-      throw new Error('Invalid filter type selection.');
-    }
-
-    // Call Puter.js image generation client-side
-    const image = await puter.ai.txt2img(prompt, base64Image);
-
+  const prompt = filterPrompts[filterType];
+  if (!prompt) {
     clearStatus();
-    
-    if (image && image.src) {
-      const img = new Image();
-      img.onload = () => {
-        photoCanvas.width = img.width || img.naturalWidth;
-        photoCanvas.height = img.height || img.naturalHeight;
-        pctx.drawImage(img, 0, 0);
+    showAIError(loader, loaderText, 'Invalid filter type selection.');
+    return;
+  }
 
-        // Save the AI image snapshot
-        aiGeneratedImageData = pctx.getImageData(0, 0, photoCanvas.width, photoCanvas.height);
-        isAIFilterActive = true;
+  // Fallback Chain Execution Plan:
+  // 1. Try Puter client-side gemini-3.1-flash-image-preview with input_image (structured object, v2 compliant).
+  // 2. Try Puter client-side gemini-3.1-flash-image-preview with input_images array (v2 compliant fallback).
+  // 3. Try Puter client-side replicate black-forest-labs/flux-schnell model with input_image.
+  // 4. Try Puter client-side default/auto (no model specified) with input_image.
+  // 5. Try direct base64 string argument as fallback.
+  // 6. Try backend /api/generate endpoint if all Puter client-side attempts fail.
 
-        updateDownload();
-        loader.classList.remove('show');
-      };
-      img.onerror = () => showAIError(loader, loaderText, 'Error loading the returned image.');
-      img.src = image.src;
-    } else {
-      showAIError(loader, loaderText, 'No image returned from Puter AI. Try again.');
+  const attempts = [
+    async () => {
+      console.log('Attempting Puter Client-Side: gemini-3.1-flash-image-preview with input_image...');
+      return await puter.ai.txt2img(prompt, {
+        model: 'gemini-3.1-flash-image-preview',
+        input_image: base64Image
+      });
+    },
+    async () => {
+      console.log('Attempting Puter Client-Side: gemini-3.1-flash-image-preview with input_images...');
+      return await puter.ai.txt2img(prompt, {
+        model: 'gemini-3.1-flash-image-preview',
+        input_images: [base64Image]
+      });
+    },
+    async () => {
+      console.log('Attempting Puter Client-Side: Replicate flux-schnell with input_image...');
+      return await puter.ai.txt2img(prompt, {
+        provider: 'replicate-image-generation',
+        model: 'black-forest-labs/flux-schnell',
+        input_image: base64Image
+      });
+    },
+    async () => {
+      console.log('Attempting Puter Client-Side: Auto-select model with input_image...');
+      return await puter.ai.txt2img(prompt, {
+        input_image: base64Image
+      });
+    },
+    async () => {
+      console.log('Attempting Puter Client-Side: Direct base64 parameter...');
+      return await puter.ai.txt2img(prompt, base64Image);
+    },
+    async () => {
+      console.log('Attempting Backend API Route: /api/generate...');
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageBase64: base64Image,
+          filterType: filterType
+        })
+      });
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || `Backend returned status ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data.success || !data.imageBase64) {
+        throw new Error(data.error || 'Backend failed to return a successful image.');
+      }
+      // Return an object that matches the structure of HTMLImageElement or has a src property
+      return { src: data.imageBase64 };
     }
-  } catch (e) {
-    clearStatus();
-    console.error('Puter AI Generation Error:', e);
-    showAIError(loader, loaderText, e.message || 'Error occurred during generation.');
+  ];
+
+  let successImage = null;
+  let lastErr = null;
+
+  for (let i = 0; i < attempts.length; i++) {
+    try {
+      const result = await attempts[i]();
+      if (result && result.src) {
+        successImage = result;
+        break;
+      }
+    } catch (e) {
+      console.warn(`Attempt ${i + 1} failed:`, e);
+      lastErr = e;
+    }
+  }
+
+  clearStatus();
+
+  if (successImage && successImage.src) {
+    const img = new Image();
+    img.onload = () => {
+      photoCanvas.width = img.width || img.naturalWidth;
+      photoCanvas.height = img.height || img.naturalHeight;
+      pctx.drawImage(img, 0, 0);
+
+      // Save the AI image snapshot
+      aiGeneratedImageData = pctx.getImageData(0, 0, photoCanvas.width, photoCanvas.height);
+      isAIFilterActive = true;
+
+      updateDownload();
+      loader.classList.remove('show');
+    };
+    img.onerror = () => showAIError(loader, loaderText, 'Error loading the returned image.');
+    img.src = successImage.src;
+  } else {
+    showAIError(loader, loaderText, (lastErr && lastErr.message) || 'Error occurred during generation. Please try again.');
   }
 }
 
