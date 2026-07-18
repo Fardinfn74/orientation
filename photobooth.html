@@ -1150,8 +1150,34 @@ async function generateAIImage(filterType, base64Image) {
       throw new Error('Invalid filter type selection.');
     }
 
-    // Call Puter.js image generation client-side
-    const image = await puter.ai.txt2img(prompt, base64Image);
+    let image = null;
+    let lastErr = null;
+
+    // Define a robust sequence of model configurations that support image-to-image tasks.
+    const optionsToTry = [
+      { model: 'gemini-3.1-flash-image-preview', input_image: base64Image },
+      { provider: 'replicate-image-generation', model: 'black-forest-labs/flux-schnell', input_image: base64Image },
+      { provider: 'replicate-image-generation', model: 'stability-ai/sdxl', input_image: base64Image },
+      { model: 'gpt-image-2', input_image: base64Image }
+    ];
+
+    for (const opts of optionsToTry) {
+      try {
+        console.log(`Attempting Puter AI img2img with model: ${opts.model || 'default'} (provider: ${opts.provider || 'default'})...`);
+        image = await puter.ai.txt2img(prompt, opts);
+        if (image && image.src) {
+          console.log(`Puter AI generation succeeded with model: ${opts.model || 'default'}`);
+          break;
+        }
+      } catch (err) {
+        console.warn(`Puter AI generation failed with model: ${opts.model || 'default'}. Error:`, err);
+        lastErr = err;
+      }
+    }
+
+    if (!image || !image.src) {
+      throw new Error(lastErr ? lastErr.message : 'All Puter AI image-to-image options failed.');
+    }
 
     clearStatus();
     
