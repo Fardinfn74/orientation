@@ -15,6 +15,7 @@
 <meta property="og:description" content="Strike a pose and pick a filter. 7 creative filters — from cute polaroid to full cyberpunk terminal.">
 <meta property="og:url" content="https://uits-it-orientation.vercel.app/photobooth">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://js.puter.com/v2/"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -895,6 +896,17 @@ const aiFilters = [
   'pixel_retro', 'pen_sketch', 'pastel_coder', 'comic_action'
 ];
 
+const filterPrompts = {
+  paper_camera: 'Transform this photo into a clean hand-drawn doodle travel-postcard illustration with flat colors, crisp outlines, charming cartoon details, storybook aesthetics. Preserve the exact identity of the original subject.',
+  cartoon_doodle: 'Transform the entire scene into a mixed-media illustration with hand-drawn cartoon overlays, bright colorful fills, doodle annotations, swirling lines, cartoon clouds. Keep subjects realistic.',
+  magazine: 'Japanese fashion magazine-inspired, turn into hand-drawn lifestyle magazine page, relaxed urban, effortlessly stylish, editorial annotations, ink outlines.',
+  folk_art: 'TRANSFORM THE ENTIRE IMAGE INTO A DECORATIVE FOLK ILLUSTRATION. FLAT STYLE, DOODLE ELEMENTS, BOLD BRIGHT PLAYFUL COLORS, SIMPLIFIED FLAT SHAPES, CHILDLIKE FAIRY-TALE MOOD.',
+  pixel_retro: 'Transform into clean 32-bit pixel art sprite. NES/SNES palette, uniform pixel grid, hard edges only, no blur or gradients, flat 2-tone shading, retro game aesthetic.',
+  pen_sketch: 'Hand drawn portrait illustration in red and yellow pen on notebook paper, doodle art, comic annotations, expressive lines, bold outline glow, handwritten notes around, realistic pen stroke texture.',
+  pastel_coder: 'Add hand-drawn pastel scribble lines, outlines, swirls, arrows, cute IT & coding annotations. Soft clean grain texture, Instagram aesthetic, minimal yet artistic.',
+  comic_action: 'Transform into high-energy comic-book action illustration. Bold cel-shaded rendering, sharp linework, graphic novel style, vibrant colors, intense contrast.'
+};
+
 const filterNames = {
   none: 'Original',
   cute: 'Cute Polaroid',
@@ -1133,41 +1145,39 @@ async function generateAIImage(filterType, base64Image) {
   const clearStatus = () => clearInterval(statusInterval);
   
   try {
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: base64Image, filterType })
-    });
-    
-    const data = await res.json();
+    const prompt = filterPrompts[filterType];
+    if (!prompt) {
+      throw new Error('Invalid filter type selection.');
+    }
+
+    // Call Puter.js image generation client-side
+    const image = await puter.ai.txt2img(prompt, base64Image);
+
     clearStatus();
     
-    if (!res.ok || data.error) {
-      showAIError(loader, loaderText, data.error || 'Unknown error');
-    } else if (data.success && data.imageBase64) {
-      // ✅ Full AI image returned — draw it directly
+    if (image && image.src) {
       const img = new Image();
       img.onload = () => {
-        photoCanvas.width = img.width;
-        photoCanvas.height = img.height;
+        photoCanvas.width = img.width || img.naturalWidth;
+        photoCanvas.height = img.height || img.naturalHeight;
         pctx.drawImage(img, 0, 0);
 
         // Save the AI image snapshot
-        aiGeneratedImageData = pctx.getImageData(0, 0, img.width, img.height);
+        aiGeneratedImageData = pctx.getImageData(0, 0, photoCanvas.width, photoCanvas.height);
         isAIFilterActive = true;
 
         updateDownload();
         loader.classList.remove('show');
       };
       img.onerror = () => showAIError(loader, loaderText, 'Error loading the returned image.');
-      img.src = data.imageBase64;
+      img.src = image.src;
     } else {
-      showAIError(loader, loaderText, 'No image returned from AI. Try again.');
+      showAIError(loader, loaderText, 'No image returned from Puter AI. Try again.');
     }
   } catch (e) {
     clearStatus();
-    console.error('AI Generation Error:', e);
-    showAIError(loader, loaderText, 'Connection error. Is the server running?');
+    console.error('Puter AI Generation Error:', e);
+    showAIError(loader, loaderText, e.message || 'Error occurred during generation.');
   }
 }
 
